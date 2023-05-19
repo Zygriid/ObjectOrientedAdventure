@@ -1,0 +1,126 @@
+These notes are a description of the steps of my implementation
+described as if each step involved no wandering around trying
+things out and didn't do any part of the next stage. This is an
+abstract description of how you might plan your work in a program
+like this. I could have assigned work in these stages.
+
+________________________________________________________________
+Step 1: Class Hierarchy
+————————————————————————————————————————————————————————————————
+
+Create class layout:
+
+		Adventure
+		Cave
+		Place
+			Room
+			Passage
+		Things
+			Treasure
+			Weapon
+			Resource
+		Actor
+			Player
+			Monster
+
+________________________________________________________________
+Stage 2:Constructors
+________________________________________________________________
+
+Create __init__ for each class according to the following
+arguments,mostly passing the values up to super().
+
+In the constructor for Room I add an empty contents list,
+to include everything: player, monsters, treasures, and tools
+
+
+	Entity.__init__(name, description)
+		Place.__init__(name, description)
+			Room.__init__(name, description)
+			Passage.__init__(name, description,)
+		Thing(name, description)
+			Treasure.__init__(name, description, value)
+			Weapon.__init__(name, description)
+			Resource.__init__(name, description)
+		Actor(cave, name, description)
+			Player.__init__(cave, name, description)
+			Monster.__init__(cave, name, description, wants, killed-by)
+
+
+________________________________________________________________
+Stage 3: Create Instances
+________________________________________________________________
+
+I create things as dictionaries of names and new instances, for
+example:
+	{
+		'diamonds': Treasure('diamonds', '6 diamonds', 100),
+		'coins': Treasure('coins', '10 coins', 50),
+	}
+
+Originally I used assignment statements then used the variables as
+constructor arguments. That turned out to be an unnecessary
+separation, so I just passed the dictionaries directly to
+the constructors.
+
+I wasn't sure what classes should "know" about the cave. At first
+I sent along the cave as a constructor argument for all of them,
+but that felt wrong. Why does a rock need to know about the cave?
+Maybe the rock doesn't even need to know about its room.
+
+Went back and forth a few times and decided to let actors know
+about the cave, but not anything else. Waiting to see how that all
+plays out. I am concenred not just with the mechanisms of the game
+but also debugging. If I am looking at a Monster in the debugger I
+want to see what room it is in.
+
+________________________________________________________________
+Step 4: Layout Cave
+________________________________________________________________
+
+While I worked on this I decdied which get and set methods I
+needed. I didn't want to automatically put get/set/add/remove
+for everything since that might expose details that shouldn't be
+available.
+
+I passed newly created rooms and passages to the Cave's
+constructor, but I did not connect anything. Now I make up a map
+and call room.connect(direction, other_room) to set up my cave. It
+turns out to be tedious and tricky to get connections that will
+allow later demonstrations of the program's features.
+
+Connecting -- the word itself tells us -- is a relationship. Here
+it is a graph-like structure, so in—t is an N-N relationship. Actually, this is a labelled graph -- each arc, i.e. connection, has a label -- 'N', 'E',,'W', 'S' That
+means each room is going to connect to 1 or more other rooms.
+
+We need a dictionary with compass directions as keys. I add an
+empty connections dictionary to the room constructor.
+
+Now I create the connect method. I am NOT going to manage these
+connections as inverses because it is not a pure "knows-about"
+kind of relationship. That is, if we were using lists, adding A to
+B's list means, B has to go on A's list. In our game, going in a
+direction from room 1 to room 2 doesn't mean that going the
+opposite direction from room 2 will get to room 1. Using
+dictionaries where the direction back is not necessarily the same
+as the direction forward. This will be a little tricky. I will use
+whatever I come with to create each room's connection dictionary
+individually. I have to figure out an easy geography that I can
+picture.
+
+I want to emphasize what is happening here with the N-N
+relationship. This really is an N-N relationship: Each of N rooms
+connects to M other rooms. The issue I am discussing is whether to
+implement an inverse for this relationship and if so, how. The
+complication of the connections not being "reversible" makes
+representing and computing the inverse too difficult.
+
+I write Cave.described() to print out the names of each room, then
+each of its connectionsin a simple form.
+
+
+________________________________________________________________
+Step 5: Distribute Objects
+________________________________________________________________
+
+Next I take the newly created instances and
